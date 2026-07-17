@@ -92,22 +92,22 @@ supply sells on the curve; 20% is reserved for the graduation LP.
 ```mermaid
 graph TD
     subgraph direct["Direct-to-V3 (live)"]
-        U1[Creator] -->|createToken payable| LP[Launchpad]
+        U1[Creator] -->|createToken| LP[Launchpad]
+        T1[Trader] -->|exact input| SH[SwapHelper]
         LP -->|CREATE2| LT[LaunchToken]
-        LP -->|init pool, mint one-sided| NFPM1[Uniswap V3 NFPM]
-        T1[Trader] -->|exact input| SH[SwapHelper] --> POOL1[V3 Pool]
+        LP -->|seed one-sided| NFPM1[Uniswap V3 NFPM]
+        SH --> POOL1[V3 Pool]
     end
 
     subgraph curve["Bonding curve"]
-        U2[Creator] -->|createToken payable| WC[WoblCurve]
-        WC -->|CREATE2| WT[WoblToken transfer-locked]
-        WC -->|unlock at graduation| WT
-        WC -->|pre-init pool at final price| NFPM2[Uniswap V3 NFPM]
+        U2[Creator] -->|createToken| WC[WoblCurve]
         T2[Trader] -->|buy / sell| WC
+        WC -->|CREATE2, unlock at graduation| WT[WoblToken transfer-locked]
+        WC -->|pre-init pool| NFPM2[Uniswap V3 NFPM]
     end
 
     LP -->|lock LP NFT| RL[RevSplitLocker]
-    WC -->|graduation: seed two-sided, lock LP NFT| RL
+    WC -->|graduate: seed two-sided| RL
     RL -->|collect, split 80/20| PW[creator + protocolWallet]
 ```
 
