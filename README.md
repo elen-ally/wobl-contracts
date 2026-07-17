@@ -9,7 +9,8 @@ Functions are referenced by name rather than line number throughout, so the refe
 as the source moves.
 
 - **Commit:** tag `audit-v1` (see "Freezing" below)
-- **Solidity:** the three deployed contracts float on `^0.8.20`; `WoblCurve` is pinned to `0.8.36`
+- **Solidity:** `Launchpad`, `RevSplitLocker` and `SwapHelper` float on `^0.8.20`; `WoblCurve` is
+  pinned to `0.8.36`
 - **Total in scope:** 1,581 lines across 4 files
 
 ---
@@ -21,7 +22,7 @@ as the source moves.
 | `Launchpad` (+ `LaunchToken`) | `contracts/Launchpad.sol` | 416 | Live on mainnet |
 | `RevSplitLocker` | `contracts/RevSplitLocker.sol` | 129 | Live on mainnet, shared by both launch paths |
 | `SwapHelper` | `contracts/SwapHelper.sol` | 149 | Live on mainnet |
-| `WoblCurve` (+ `WoblToken` + `WMath`) | `contracts/WoblCurve.sol` | 887 | NOT deployed. Audit before mainnet. |
+| `WoblCurve` (+ `WoblToken` + `WMath`) | `contracts/WoblCurve.sol` | 887 | Live on mainnet, not yet reachable from the frontend |
 
 **Out of scope:** Uniswap V3 core/periphery (NFPM, factory, pool, SwapRouter02), WETH9, Multicall3,
 the frontend, and all off-chain tooling.
@@ -70,7 +71,7 @@ Sequence in `createToken` / `_seedAndLock` / `_devBuy` / `_refund`:
 `SwapHelper` is a stateless ETH/token swap router used by the frontend, and required on testnet,
 which has no SwapRouter.
 
-### 2.2 Bonding curve (WoblCurve, not deployed)
+### 2.2 Bonding curve (WoblCurve)
 
 `WoblCurve.createToken()` deploys a transfer-locked fixed-supply ERC20 (`WoblToken`) and
 pre-initializes its future V3 graduation pool at a deterministic final price (`_graduationSqrtPrice`,
@@ -97,7 +98,7 @@ graph TD
         LP -->|safeTransferFrom LP NFT| RL[RevSplitLocker]
         T1[Trader] -->|exact input| SH[SwapHelper] --> POOL1[V3 Pool]
     end
-    subgraph "Bonding curve (not deployed)"
+    subgraph "Bonding curve"
         U2[Creator] -->|createToken payable| WC[WoblCurve]
         WC -->|CREATE2| WT[WoblToken transfer-locked]
         WC -->|pre-init pool at final price| NFPM2[Uniswap V3 NFPM]
@@ -257,12 +258,24 @@ WoblCurve.
 | SwapHelper | `0x9874DfaA6C60763449EE677C06bd6AeFdeB73Ff2` |
 | protocolWallet (immutable 20%) | `0xfEE504BE76aa5187452976CdC255819F0dB2846C` |
 | protocolBps | `2000` |
-| WoblCurve (production) | not deployed |
+| WoblCurve (production) | `0x51a751a63623d4f1b7738965814B622DC09B2532` |
+| WoblCurve `virtualEthSeed` | `2.222 ETH` (graduation raise `6.666 ETH`) |
+| WoblCurve `migrationFeeBps` | `0` |
+| WoblCurve owner (pause new launches only) | `0xaD985958ced473aD890c236d9EEC2762dB2a6629` |
 
-A throwaway WoblCurve exists at `0x8972aD01faBAdf7367f80074d950e11c1E024d87`
-(`virtualEthSeed` 0.001 ETH, graduation ~0.003 ETH, reusing the live locker), deployed only to prove
-the graduation seam end-to-end. It is recorded in `deployments.curve.mainnet.json` and is a test
-artifact, not the production deployment.
+WoblCurve was deployed on 2026-07-17 and reuses the live RevSplitLocker and protocolWallet above.
+It is **live on-chain but not yet reachable from the frontend**: the site does not expose the curve
+launch path, so at the time of writing the only tokens on it are the ones described below. Review
+should assume it will be exposed to the public without further contract changes.
+
+Two test artifacts exist on mainnet and are **not** the production deployment:
+
+- A throwaway WoblCurve at `0x8972aD01faBAdf7367f80074d950e11c1E024d87` (`virtualEthSeed` 0.001 ETH,
+  graduation ~0.003 ETH), deployed to prove the graduation seam end-to-end. It is recorded in
+  `deployments.curve.mainnet.json` as the prior deployment.
+- One smoke-test token on the production curve, `0xd49c0d2610f22A16fC0ea6147E929D70661c28CD`
+  ("Curve Smoke Test" / SMOKE), created and round-tripped (buy then full sell) to confirm quoting,
+  the transfer lock, and the 80/20 fee split against real funds. It did not graduate.
 
 ### Testnet (46630)
 
@@ -355,9 +368,9 @@ off. `WoblCurve` compiles to 19,839 bytes, under the EIP-170 limit.
   `[MIN_SQRT_RATIO, MAX_SQRT_RATIO]`. The `uint160` cast is checked, but a misconfigured
   `virtualEthSeed` at deploy could produce a price outside V3's usable range and make every
   `createToken` revert at pool init. Operator-controlled self-DoS, no funds at risk, nothing is
-  locked before init. The planned mainnet seed (2.222 ETH, giving a ~6.666 ETH raise) is verified in
-  range by the fork test. A constructor-time assertion would fail a bad seed at deploy rather than
-  bricking launches.
+  locked before init. The deployed mainnet seed (2.222 ETH, giving a 6.666 ETH raise) is verified in
+  range by the fork test and by a live round-trip on the deployed curve. A constructor-time assertion
+  would fail a bad seed at deploy rather than bricking launches.
 - **INFO-6: protocol-fee dust is swept in WETH, not native ETH.** All other payouts are native ETH;
   leftover seed WETH goes to `protocolWallet` as WETH. A reconciliation note, not a bug.
 
