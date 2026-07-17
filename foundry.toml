@@ -1,0 +1,18 @@
+# Foundry config for the audit test suite (fuzz + invariant tests).
+# The PRODUCTION build is solc-js (see README, Section 12). This config exists so
+# `forge test` can property-test the contracts; it mirrors the solc-js settings
+# (optimizer on, 200 runs, NO viaIR) so behaviour matches the deployed bytecode.
+# evm_version = cancun because the mainnet Launchpad already uses transient
+# storage (TSTORE/TLOAD), so the chain supports it.
+[profile.default]
+src = "contracts"
+test = "test"
+out = "out"
+cache_path = "cache"
+libs = []
+solc = "0.8.36"
+optimizer = true
+optimizer_runs = 200
+evm_version = "cancun"
+fuzz = { runs = 512 }
+invariant = { runs = 256, depth = 32, fail_on_revert = false }

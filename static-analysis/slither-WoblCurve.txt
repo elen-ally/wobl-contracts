@@ -1,0 +1,116 @@
+'solc --version' running
+'solc contracts/WoblCurve.sol --combined-json abi,ast,bin,bin-runtime,srcmap,srcmap-runtime,userdoc,devdoc,hashes --allow-paths .,D:\Git\Robinhood-Launchpad\contracts\contracts' running
+Compilation warnings/errors on contracts/WoblCurve.sol:
+Warning: Contract code size is 32559 bytes and exceeds 24576 bytes (a limit introduced in Spurious Dragon). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+   --> contracts/WoblCurve.sol:263:1:
+    |
+263 | contract WoblCurve {
+    | ^ (Relevant source part starts here and spans across multiple lines).
+
+
+INFO:Detectors:
+Detector: arbitrary-send-eth
+WoblCurve._seedAndLockTwoSided(address,uint256,address) (contracts/WoblCurve.sol#747-784) sends eth to arbitrary user
+	Dangerous calls:
+	- IWETH9(weth).deposit{value: ethLiq}() (contracts/WoblCurve.sol#751)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#functions-that-send-ether-to-arbitrary-destinations
+INFO:Detectors:
+Detector: incorrect-exp
+WMath.mulDiv(uint256,uint256,uint256) (contracts/WoblCurve.sol#125-171) has bitwise-xor operator ^ instead of the exponentiation operator **: 
+	 - inverse = (3 * denominator) ^ 2 (contracts/WoblCurve.sol#160)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#incorrect-exponentiation
+INFO:Detectors:
+Detector: unchecked-transfer
+WoblCurve._seedAndLockTwoSided(address,uint256,address) (contracts/WoblCurve.sol#747-784) ignores return value by IWETH9(weth).transfer(protocolWallet,wLeft) (contracts/WoblCurve.sol#781)
+WoblCurve._seedAndLockTwoSided(address,uint256,address) (contracts/WoblCurve.sol#747-784) ignores return value by IWoblToken(token).transfer(DEAD,tLeft) (contracts/WoblCurve.sol#783)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unchecked-transfer
+INFO:Detectors:
+Detector: divide-before-multiply
+WMath.mulDiv(uint256,uint256,uint256) (contracts/WoblCurve.sol#125-171) performs a multiplication on the result of a division:
+	- denominator = denominator / twos (contracts/WoblCurve.sol#154)
+	- inverse = (3 * denominator) ^ 2 (contracts/WoblCurve.sol#160)
+WMath.mulDiv(uint256,uint256,uint256) (contracts/WoblCurve.sol#125-171) performs a multiplication on the result of a division:
+	- denominator = denominator / twos (contracts/WoblCurve.sol#154)
+	- inverse *= 2 - denominator * inverse (contracts/WoblCurve.sol#161)
+WMath.mulDiv(uint256,uint256,uint256) (contracts/WoblCurve.sol#125-171) performs a multiplication on the result of a division:
+	- denominator = denominator / twos (contracts/WoblCurve.sol#154)
+	- inverse *= 2 - denominator * inverse (contracts/WoblCurve.sol#162)
+WMath.mulDiv(uint256,uint256,uint256) (contracts/WoblCurve.sol#125-171) performs a multiplication on the result of a division:
+	- denominator = denominator / twos (contracts/WoblCurve.sol#154)
+	- inverse *= 2 - denominator * inverse (contracts/WoblCurve.sol#163)
+WMath.mulDiv(uint256,uint256,uint256) (contracts/WoblCurve.sol#125-171) performs a multiplication on the result of a division:
+	- denominator = denominator / twos (contracts/WoblCurve.sol#154)
+	- inverse *= 2 - denominator * inverse (contracts/WoblCurve.sol#164)
+WMath.mulDiv(uint256,uint256,uint256) (contracts/WoblCurve.sol#125-171) performs a multiplication on the result of a division:
+	- denominator = denominator / twos (contracts/WoblCurve.sol#154)
+	- inverse *= 2 - denominator * inverse (contracts/WoblCurve.sol#165)
+WMath.mulDiv(uint256,uint256,uint256) (contracts/WoblCurve.sol#125-171) performs a multiplication on the result of a division:
+	- denominator = denominator / twos (contracts/WoblCurve.sol#154)
+	- inverse *= 2 - denominator * inverse (contracts/WoblCurve.sol#166)
+WMath.mulDiv(uint256,uint256,uint256) (contracts/WoblCurve.sol#125-171) performs a multiplication on the result of a division:
+	- prod0 = prod0 / twos (contracts/WoblCurve.sol#155)
+	- result = prod0 * inverse (contracts/WoblCurve.sol#168)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#divide-before-multiply
+INFO:Detectors:
+Detector: incorrect-equality
+WoblCurve._seedAndLockTwoSided(address,uint256,address) (contracts/WoblCurve.sol#747-784) uses a dangerous strict equality:
+	- liquidity == 0 (contracts/WoblCurve.sol#772)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#dangerous-strict-equalities
+INFO:Detectors:
+Detector: uninitialized-local
+WoblCurve._seedAndLockTwoSided(address,uint256,address).mp (contracts/WoblCurve.sol#755) is a local variable never initialized
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#uninitialized-local-variables
+INFO:Detectors:
+Detector: unused-return
+WoblCurve._initPool(address) (contracts/WoblCurve.sol#570-583) ignores return value by (cur,None,None,None,None,None,None) = IUniswapV3Pool(poolAddr).slot0() (contracts/WoblCurve.sol#577)
+WoblCurve._seedAndLockTwoSided(address,uint256,address) (contracts/WoblCurve.sol#747-784) ignores return value by IWETH9(weth).approve(nfpm,ethLiq) (contracts/WoblCurve.sol#752)
+WoblCurve._seedAndLockTwoSided(address,uint256,address) (contracts/WoblCurve.sol#747-784) ignores return value by IWoblToken(token).approve(nfpm,LP_SUPPLY_RAW) (contracts/WoblCurve.sol#753)
+WoblCurve._seedAndLockTwoSided(address,uint256,address) (contracts/WoblCurve.sol#747-784) ignores return value by (tokenId,liquidity,None,None) = INonfungiblePositionManager(nfpm).mint(mp) (contracts/WoblCurve.sol#771)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unused-return
+INFO:Detectors:
+Detector: missing-zero-check
+WoblCurve.constructor(address,address,address,address,address,uint128,uint16,address).owner_ (contracts/WoblCurve.sol#406) lacks a zero-check on :
+		- owner = owner_ (contracts/WoblCurve.sol#421)
+WoblCurve.transferOwnership(address).newOwner (contracts/WoblCurve.sol#818) lacks a zero-check on :
+		- owner = newOwner (contracts/WoblCurve.sol#820)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-zero-address-validation
+INFO:Detectors:
+Detector: reentrancy-benign
+Reentrancy in WoblCurve.createToken(string,string,string,uint256,bytes32) (contracts/WoblCurve.sol#528-562):
+	External calls:
+	- poolAddr = _initPool(token) (contracts/WoblCurve.sol#540)
+		- poolAddr = INonfungiblePositionManager(nfpm).createAndInitializePoolIfNecessary(token0,token1,FEE,sqrtP) (contracts/WoblCurve.sol#573)
+	State variables written after the call(s):
+	- allTokens.push(token) (contracts/WoblCurve.sol#553)
+	- curves[token] = Curve({virtualEth:virtualEthSeed,virtualTokens:uint128(VTOK_SEED),realEth:0,realTokens:uint128(CURVE_SUPPLY_RAW),creator:msg.sender,createdAt:uint64(block.timestamp),graduated:false,migrated:false}) (contracts/WoblCurve.sol#543-552)
+	- pool[token] = uint256(uint160(poolAddr)) (contracts/WoblCurve.sol#541)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-3
+INFO:Detectors:
+Detector: timestamp
+WoblCurve.currentPrice(address) (contracts/WoblCurve.sol#456-460) uses timestamp for comparisons
+	Dangerous comparisons:
+	- c.creator == address(0) (contracts/WoblCurve.sol#458)
+WoblCurve.progressBps(address) (contracts/WoblCurve.sol#463-467) uses timestamp for comparisons
+	Dangerous comparisons:
+	- c.creator == address(0) (contracts/WoblCurve.sol#465)
+WoblCurve.quoteBuy(address,uint256) (contracts/WoblCurve.sol#489-510) uses timestamp for comparisons
+	Dangerous comparisons:
+	- c.creator == address(0) (contracts/WoblCurve.sol#493)
+	- c.graduated || ethIn == 0 (contracts/WoblCurve.sol#494)
+	- tokensOut >= c.realTokens (contracts/WoblCurve.sol#501)
+	- exactEth > ethForCurve (contracts/WoblCurve.sol#505)
+	- ethUsed > ethIn (contracts/WoblCurve.sol#507)
+WoblCurve.quoteSell(address,uint256) (contracts/WoblCurve.sol#512-520) uses timestamp for comparisons
+	Dangerous comparisons:
+	- c.creator == address(0) (contracts/WoblCurve.sol#514)
+	- c.graduated || tokenAmount == 0 (contracts/WoblCurve.sol#515)
+WoblCurve._seedAndLockTwoSided(address,uint256,address) (contracts/WoblCurve.sol#747-784) uses timestamp for comparisons
+	Dangerous comparisons:
+	- liquidity == 0 (contracts/WoblCurve.sol#772)
+	- INonfungiblePositionManager(nfpm).ownerOf(tokenId) != locker (contracts/WoblCurve.sol#777)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#block-timestamp
+INFO:Detectors:
+Detector: immutable-states
+WoblToken.totalSupply (contracts/WoblCurve.sol#190) should be immutable 
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#state-variables-that-could-be-declared-immutable
+INFO:Slither:contracts/WoblCurve.sol analyzed (8 contracts with 80 detectors), 27 result(s) found

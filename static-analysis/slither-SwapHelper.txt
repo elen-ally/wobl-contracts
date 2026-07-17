@@ -1,0 +1,3 @@
+'solc --version' running
+'solc contracts/SwapHelper.sol --combined-json abi,ast,bin,bin-runtime,srcmap,srcmap-runtime,userdoc,devdoc,hashes --allow-paths .,D:\Git\Robinhood-Launchpad\contracts\contracts' running
+INFO:Slither:contracts/SwapHelper.sol analyzed (5 contracts with 80 detectors), 0 result(s) found

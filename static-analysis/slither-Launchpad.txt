@@ -1,0 +1,95 @@
+'solc --version' running
+'solc contracts/Launchpad.sol --combined-json abi,ast,bin,bin-runtime,srcmap,srcmap-runtime,userdoc,devdoc,hashes --allow-paths .,D:\Git\Robinhood-Launchpad\contracts\contracts' running
+INFO:Detectors:
+Detector: arbitrary-send-eth
+Launchpad._refund(address) (contracts/Launchpad.sol#405-415) sends eth to arbitrary user
+	Dangerous calls:
+	- (ok,None) = msg.sender.call{value: ethBal}() (contracts/Launchpad.sol#410)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#functions-that-send-ether-to-arbitrary-destinations
+INFO:Detectors:
+Detector: unchecked-transfer
+Launchpad._refund(address) (contracts/Launchpad.sol#405-415) ignores return value by LaunchToken(token).transfer(msg.sender,dust) (contracts/Launchpad.sol#414)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unchecked-transfer
+INFO:Detectors:
+Detector: incorrect-equality
+Launchpad._devBuy(address,bool,uint256) (contracts/Launchpad.sol#370-388) uses a dangerous strict equality:
+	- tokensOut == 0 (contracts/Launchpad.sol#384)
+Launchpad._seedAndLock(address,address,address,bool,uint256,Launchpad.CreateParams) (contracts/Launchpad.sol#312-368) uses a dangerous strict equality:
+	- liquidity == 0 (contracts/Launchpad.sol#362)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#dangerous-strict-equalities
+INFO:Detectors:
+Detector: unused-return
+Launchpad._seedAndLock(address,address,address,bool,uint256,Launchpad.CreateParams) (contracts/Launchpad.sol#312-368) ignores return value by (curSqrt,None,None,None,None,None,None) = IUniswapV3Pool(pool).slot0() (contracts/Launchpad.sol#328)
+Launchpad._seedAndLock(address,address,address,bool,uint256,Launchpad.CreateParams) (contracts/Launchpad.sol#312-368) ignores return value by LaunchToken(token).approve(nfpm,supplyRaw) (contracts/Launchpad.sol#340)
+Launchpad._seedAndLock(address,address,address,bool,uint256,Launchpad.CreateParams) (contracts/Launchpad.sol#312-368) ignores return value by (tokenId,liquidity,None,None) = INonfungiblePositionManager(nfpm).mint(INonfungiblePositionManager.MintParams({token0:token0,token1:token1,fee:p.fee,tickLower:p.tickLower,tickUpper:p.tickUpper,amount0Desired:supplyRaw,amount1Desired:0,amount0Min:0,amount1Min:0,recipient:address(this),deadline:block.timestamp})) (contracts/Launchpad.sol#342-356)
+Launchpad._seedAndLock(address,address,address,bool,uint256,Launchpad.CreateParams) (contracts/Launchpad.sol#312-368) ignores return value by (tokenId,liquidity,None,None) = INonfungiblePositionManager(nfpm).mint(INonfungiblePositionManager.MintParams({token0:token0,token1:token1,fee:p.fee,tickLower:p.tickLower,tickUpper:p.tickUpper,amount0Desired:0,amount1Desired:supplyRaw,amount0Min:0,amount1Min:0,recipient:address(this),deadline:block.timestamp})) (contracts/Launchpad.sol#342-356)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unused-return
+INFO:Detectors:
+Detector: reentrancy-benign
+Reentrancy in Launchpad._devBuy(address,bool,uint256) (contracts/Launchpad.sol#370-388):
+	External calls:
+	- (a0,a1) = IUniswapV3Pool(pool).swap(msg.sender,zeroForOne,int256(wethIn),limit,) (contracts/Launchpad.sol#380-382)
+	State variables written after the call(s):
+	- _expectedPool = address(0) (contracts/Launchpad.sol#386)
+	- _wethIsToken0 = false (contracts/Launchpad.sol#387)
+Reentrancy in Launchpad.createToken(Launchpad.CreateParams) (contracts/Launchpad.sol#269-307):
+	External calls:
+	- (pool,tokenId) = _seedAndLock(token,token0,token1,memeIsToken0,supplyRaw,p) (contracts/Launchpad.sol#283)
+		- pool = INonfungiblePositionManager(nfpm).createAndInitializePoolIfNecessary(token0,token1,p.fee,p.sqrtPriceX96) (contracts/Launchpad.sol#317-319)
+		- LaunchToken(token).approve(nfpm,supplyRaw) (contracts/Launchpad.sol#340)
+		- INonfungiblePositionManager(nfpm).safeTransferFrom(address(this),locker,tokenId,abi.encode(msg.sender,token0,token1)) (contracts/Launchpad.sol#364-366)
+		- (tokenId,liquidity,None,None) = INonfungiblePositionManager(nfpm).mint(INonfungiblePositionManager.MintParams({token0:token0,token1:token1,fee:p.fee,tickLower:p.tickLower,tickUpper:p.tickUpper,amount0Desired:supplyRaw,amount1Desired:0,amount0Min:0,amount1Min:0,recipient:address(this),deadline:block.timestamp})) (contracts/Launchpad.sol#342-356)
+		- (tokenId,liquidity,None,None) = INonfungiblePositionManager(nfpm).mint(INonfungiblePositionManager.MintParams({token0:token0,token1:token1,fee:p.fee,tickLower:p.tickLower,tickUpper:p.tickUpper,amount0Desired:0,amount1Desired:supplyRaw,amount0Min:0,amount1Min:0,recipient:address(this),deadline:block.timestamp})) (contracts/Launchpad.sol#342-356)
+	- IWETH9(weth).deposit{value: msg.value}() (contracts/Launchpad.sol#289)
+	- devTokens = _devBuy(pool,memeIsToken0,msg.value) (contracts/Launchpad.sol#290)
+		- (a0,a1) = IUniswapV3Pool(pool).swap(msg.sender,zeroForOne,int256(wethIn),limit,) (contracts/Launchpad.sol#380-382)
+	External calls sending eth:
+	- IWETH9(weth).deposit{value: msg.value}() (contracts/Launchpad.sol#289)
+	State variables written after the call(s):
+	- devTokens = _devBuy(pool,memeIsToken0,msg.value) (contracts/Launchpad.sol#290)
+		- _expectedPool = pool (contracts/Launchpad.sol#377)
+		- _expectedPool = address(0) (contracts/Launchpad.sol#386)
+	- devTokens = _devBuy(pool,memeIsToken0,msg.value) (contracts/Launchpad.sol#290)
+		- _wethIsToken0 = wethIsToken0 (contracts/Launchpad.sol#378)
+		- _wethIsToken0 = false (contracts/Launchpad.sol#387)
+Reentrancy in Launchpad.createToken(Launchpad.CreateParams) (contracts/Launchpad.sol#269-307):
+	External calls:
+	- (pool,tokenId) = _seedAndLock(token,token0,token1,memeIsToken0,supplyRaw,p) (contracts/Launchpad.sol#283)
+		- pool = INonfungiblePositionManager(nfpm).createAndInitializePoolIfNecessary(token0,token1,p.fee,p.sqrtPriceX96) (contracts/Launchpad.sol#317-319)
+		- LaunchToken(token).approve(nfpm,supplyRaw) (contracts/Launchpad.sol#340)
+		- INonfungiblePositionManager(nfpm).safeTransferFrom(address(this),locker,tokenId,abi.encode(msg.sender,token0,token1)) (contracts/Launchpad.sol#364-366)
+		- (tokenId,liquidity,None,None) = INonfungiblePositionManager(nfpm).mint(INonfungiblePositionManager.MintParams({token0:token0,token1:token1,fee:p.fee,tickLower:p.tickLower,tickUpper:p.tickUpper,amount0Desired:supplyRaw,amount1Desired:0,amount0Min:0,amount1Min:0,recipient:address(this),deadline:block.timestamp})) (contracts/Launchpad.sol#342-356)
+		- (tokenId,liquidity,None,None) = INonfungiblePositionManager(nfpm).mint(INonfungiblePositionManager.MintParams({token0:token0,token1:token1,fee:p.fee,tickLower:p.tickLower,tickUpper:p.tickUpper,amount0Desired:0,amount1Desired:supplyRaw,amount0Min:0,amount1Min:0,recipient:address(this),deadline:block.timestamp})) (contracts/Launchpad.sol#342-356)
+	- IWETH9(weth).deposit{value: msg.value}() (contracts/Launchpad.sol#289)
+	- devTokens = _devBuy(pool,memeIsToken0,msg.value) (contracts/Launchpad.sol#290)
+		- (a0,a1) = IUniswapV3Pool(pool).swap(msg.sender,zeroForOne,int256(wethIn),limit,) (contracts/Launchpad.sol#380-382)
+	- _refund(token) (contracts/Launchpad.sol#295)
+		- IWETH9(weth).withdraw(wbal) (contracts/Launchpad.sol#407)
+		- (ok,None) = msg.sender.call{value: ethBal}() (contracts/Launchpad.sol#410)
+		- LaunchToken(token).transfer(msg.sender,dust) (contracts/Launchpad.sol#414)
+	External calls sending eth:
+	- IWETH9(weth).deposit{value: msg.value}() (contracts/Launchpad.sol#289)
+	- _refund(token) (contracts/Launchpad.sol#295)
+		- (ok,None) = msg.sender.call{value: ethBal}() (contracts/Launchpad.sol#410)
+	State variables written after the call(s):
+	- allTokens.push(token) (contracts/Launchpad.sol#304)
+	- launches[token] = LaunchInfo({token:token,pool:pool,creator:msg.sender,tokenId:tokenId,createdAt:uint64(block.timestamp)}) (contracts/Launchpad.sol#297-303)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-3
+INFO:Detectors:
+Detector: timestamp
+Launchpad._seedAndLock(address,address,address,bool,uint256,Launchpad.CreateParams) (contracts/Launchpad.sol#312-368) uses timestamp for comparisons
+	Dangerous comparisons:
+	- liquidity == 0 (contracts/Launchpad.sol#362)
+	- INonfungiblePositionManager(nfpm).ownerOf(tokenId) != locker (contracts/Launchpad.sol#367)
+Launchpad._devBuy(address,bool,uint256) (contracts/Launchpad.sol#370-388) uses timestamp for comparisons
+	Dangerous comparisons:
+	- tokensOut == 0 (contracts/Launchpad.sol#384)
+Launchpad.uniswapV3SwapCallback(int256,int256,bytes) (contracts/Launchpad.sol#392-401) uses timestamp for comparisons
+	Dangerous comparisons:
+	- msg.sender != _expectedPool (contracts/Launchpad.sol#393)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#block-timestamp
+INFO:Detectors:
+Detector: immutable-states
+LaunchToken.totalSupply (contracts/Launchpad.sol#66) should be immutable 
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#state-variables-that-could-be-declared-immutable
+INFO:Slither:contracts/Launchpad.sol analyzed (6 contracts with 80 detectors), 15 result(s) found

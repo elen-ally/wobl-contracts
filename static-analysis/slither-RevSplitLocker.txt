@@ -1,0 +1,25 @@
+'solc --version' running
+'solc contracts/RevSplitLocker.sol --combined-json abi,ast,bin,bin-runtime,srcmap,srcmap-runtime,userdoc,devdoc,hashes --allow-paths .,D:\Git\Robinhood-Launchpad\contracts\contracts' running
+INFO:Detectors:
+Detector: reentrancy-no-eth
+Reentrancy in RevSplitLocker.collect(uint256) (contracts/RevSplitLocker.sol#100-128):
+	External calls:
+	- (amount0,amount1) = INonfungiblePositionManager(nfpm).collect(INonfungiblePositionManager.CollectParams({tokenId:tokenId,recipient:address(this),amount0Max:type()(uint128).max,amount1Max:type()(uint128).max})) (contracts/RevSplitLocker.sol#107-114)
+	- p0 > 0 && ! IERC20Min(info.token0).transfer(protocolWallet,p0) (contracts/RevSplitLocker.sol#121)
+	- p1 > 0 && ! IERC20Min(info.token1).transfer(protocolWallet,p1) (contracts/RevSplitLocker.sol#122)
+	State variables written after the call(s):
+	- _entered = 1 (contracts/RevSplitLocker.sol#127)
+	RevSplitLocker._entered (contracts/RevSplitLocker.sol#48) can be used in cross function reentrancies:
+	- RevSplitLocker.collect(uint256) (contracts/RevSplitLocker.sol#100-128)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-2
+INFO:Detectors:
+Detector: reentrancy-events
+Reentrancy in RevSplitLocker.collect(uint256) (contracts/RevSplitLocker.sol#100-128):
+	External calls:
+	- (amount0,amount1) = INonfungiblePositionManager(nfpm).collect(INonfungiblePositionManager.CollectParams({tokenId:tokenId,recipient:address(this),amount0Max:type()(uint128).max,amount1Max:type()(uint128).max})) (contracts/RevSplitLocker.sol#107-114)
+	- p0 > 0 && ! IERC20Min(info.token0).transfer(protocolWallet,p0) (contracts/RevSplitLocker.sol#121)
+	- p1 > 0 && ! IERC20Min(info.token1).transfer(protocolWallet,p1) (contracts/RevSplitLocker.sol#122)
+	Event emitted after the call(s):
+	- Collected(tokenId,info.creator,c0,c1,p0,p1) (contracts/RevSplitLocker.sol#126)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-4
+INFO:Slither:contracts/RevSplitLocker.sol analyzed (3 contracts with 80 detectors), 2 result(s) found
